@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Godot Engine binary size history</title>
+        <link rel="stylesheet" href="thirdparty/water.min.css">
+        <style>
+            body {
+                line-height: 1.6;
+            }
+
+            /* Make Frappe better handle dark themes. */
+            .line-horizontal,
+            .line-vertical {
+                stroke: hsla(0, 0%, 50%, 0.5) !important;
+            }
+
+            /* Stylistic Frappe change (remove outlines around line datapoints). */
+            /* This helps make charts look less busy, especially on narrow displays. */
+            .chart-container .dataset-units circle {
+                stroke: transparent !important;
+            }
+
+        </style>
+        <script src="thirdparty/frappe-charts.min.umd.js"></script>
+        <script type="module">
+            const labels = ["1.1", "2.0", "2.0.1", "2.0.2", "2.0.3", "2.0.4", "2.1", "2.1.1", "2.1.2", "2.1.3", "2.1.4", "2.1.5", "2.1.6", "3.0", "3.0.1", "3.0.2", "3.0.3", "3.0.4", "3.0.5", "3.0.6", "3.1", "3.1.1", "3.1.2", "3.2", "3.2.1", "3.2.2", "3.2.3", "3.3", "3.3.1", "3.3.2", "3.3.3", "3.3.4", "3.4", "3.4.1", "3.4.2", "3.4.3", "3.4.4", "4.0alpha5"];
+
+            const dataEditor = {
+                labels,
+                datasets: [
+                    {
+                        name: "Windows (download)",
+                        values: [9.878, 12.288, 12.800, 12.544, 7.900, 8.518, 12.575, 12.677, 12.911, 13.152, 13.581, 13.518, 12.537, 20.222, 20.232, 18.150, 18.158, 18.161, 19.139, 20.174, 23.577, 23.728, 23.255, 28.306, 28.648, 28.784, 28.219, 35.466, 35.468, 35.554, 35.562, 35.438, 38.381, 38.211, 38.227, 38.228, 38.759, 53.084],
+                    },
+                    {
+                        name: "Windows (extracted)",
+                        values: [30.374, 24.383, 25.095, 46.755, 20.077, 21.440, 28.635, 28.749, 28.920, 29.288, 29.689, 30.336, 30.111, 46.512, 46.728, 46.739, 40.048, 40.059, 40.063, 43.015, 52.637, 53.113, 53.287, 63.953, 64.089, 64.756, 64.970, 72.633, 72.666, 72.669, 72.791, 72.827, 77.332, 77.010, 76.836, 76.871, 76.874, 114.124],
+                    },
+                    {
+                        name: "Linux (download)",
+                        values: [9.497, 12.427, 11.257, 11.044, 11.072, 11.965, 16.332, 16.429, 16.853, 17.109, 17.378, 17.644, 17.646, 19.080, 19.127, 19.139, 19.896, 19.909, 19.907, 20.875, 26.194, 26.496, 26.601, 29.553, 29.643, 29.994, 30.126, 36.709, 36.742, 36.744, 36.851, 36.868, 40.103, 39.736, 39.558, 39.582, 39.582, 53.207],
+                    },
+                    {
+                        name: "Linux (extracted)",
+                        values: [25.796, 33.046, 11.493, 29.710, 29.770, 31.812, 39.940, 40.198, 41.001, 41.429, 41.955, 42.495, 42.522, 46.021, 46.278, 46.287, 48.690, 48.699, 48.706, 51.884, 64.175, 64.615, 64.752, 71.201, 71.335, 72.122, 72.343, 76.142, 76.142, 76.155, 76.290, 76.331, 79.620, 79.292, 79.116, 79.165, 79.169, 114.392],
+                    },
+                ],
+            };
+
+            const dataExportTemplates = {
+                labels,
+                datasets: [
+                    {
+                        name: "Windows (download)",
+                        values: [7.658, 8.188, 9.629, 9.218, 5.152, 5.763, 6.284, 6.291, 6.319, 6.359, 6.445, 6.638, 6.580, 9.875, 9.918, 9.922, 9.866, 9.866, 9.866, 9.865, 11.192, 11.354, 11.405, 13.110, 13.135, 13.248, 13.275, 13.674, 13.685, 13.684, 13.695, 13.693, 14.197, 14.219, 14.217, 14.224, 14.242, 23.095],
+                    },
+                    {
+                        name: "Windows (extracted)",
+                        values: [23.817, 22.264, 18.775, 35.049, 14.238, 15.612, 16.569, 16.606, 16.673, 16.764, 16.972, 17.311, 17.141, 25.634, 25.784, 25.788, 24.363, 24.361, 24.363, 24.361, 27.951, 28.127, 28.235, 33.375, 33.414, 33.738, 33.812, 34.347, 34.370, 34.371, 34.389, 34.391, 35.650, 35.690, 35.692, 35.705, 35.726, 61.051],
+                    },
+                    {
+                        name: "Linux (download)",
+                        values: [26.160, 8.022, 8.437, 8.037, 8.044, 9.010, 9.390, 9.444, 9.831, 9.889, 10.000,
+                            10.090, 10.104, 10.410, 10.450, 10.449, 10.836, 10.836, 10.837, 10.840, 13.147, 13.217, 13.258, 14.303, 14.322, 14.448, 14.482, 14.251, 14.260, 14.259, 14.266, 14.266, 15.133, 15.141, 15.142, 15.165, 15.188, 23.305],
+                    },
+                    {
+                        name: "Linux (extracted)",
+                        values: [26.969, 8.175, 8.612, 22.699, 22.719, 24.993, 25.986, 26.765, 26.930, 27.180, 27.304, 27.351, 25.834, 28.180, 28.180, 29.848, 29.852, 29.852, 29.851, 28.014, 36.116, 36.209, 35.918, 38.959, 39.369, 39.458, 38.924, 35.342, 35.342, 35.363, 35.363, 35.322, 37.338, 37.338, 37.358, 37.391, 37.297, 61.256],
+                    },
+                    {
+                        name: "HTML5 (download)",
+                        values: [5.423, 5.704, 6.136, 6.044, 6.053, 6.629, 7.266, 6.818, 6.866, 6.902, 6.925, 6.324, 6.377, 3.390, 3.399, 3.394, 3.382, 3.382, 3.381, 3.381, 4.135, 4.007, 4.006, 4.128, 4.128, 4.181, 4.201, 3.954, 3.957, 3.957, 3.959, 3.959, 4.140, 4.144, 4.144, 4.148, 4.148],
+                    },
+                    {
+                        name: "HTML5 (extracted)",
+                        values: [25.814, 25.299, 25.306, 25.060, 25.104, 27.003, 29.088, 28.603, 28.785, 28.955, 28.535, 27.038, 27.251, 11.728, 11.792, 11.775, 11.741, 11.741, 11.741, 11.740, 13.627, 13.342, 13.395, 14.167, 14.166, 14.416, 14.475, 13.028, 13.038, 13.038, 13.044, 13.046, 13.706, 13.720, 13.720, 13.727, 13.729],
+                    },
+                ],
+            };
+
+            const dataExportTemplatesTpz = {
+                labels,
+                datasets: [
+                    {
+                        name: "Templates TPZ archive (download)",
+                        values: [179.474, 161.199, 166.079, 163.442, 149.455, 165.425, 178.968, 174.060, 176.073, 176.394, 220.892, 229.924, 245.334, 309.160, 310.791, 310.879, 370.111, 370.127, 370.119, 378.178, 450.050, 452.650, 428.803, 454.914, 455.307, 461.710, 462.726, 512.218, 515.583, 515.533, 515.993, 516.114, 533.199, 533.806, 533.836, 534.152, 534.244, 681.261],
+                    },
+                    {
+                        name: "Templates TPZ archive (extracted)",
+                        values: [224.661, 201.703, 199.244, 312.760, 240.508, 263.915, 280.846, 276.391, 280.039, 280.992, 326.650, 336.472, 351.311, 440.744, 443.501, 443.629, 512.488, 512.504, 512.499, 528.451, 622.634, 626.100, 602.535, 649.693, 650.366, 658.981, 660.425, 691.544, 700.578, 700.530, 701.110, 701.313, 718.445, 719.269, 719.323, 719.712, 719.849, 991.774],
+                    },
+                ],
+            };
+
+            document.addEventListener("DOMContentLoaded", function () {
+                const chartEditor = new frappe.Chart("#chart-editor", {
+                    data: dataEditor,
+                    type: "line",
+                    height: 600,
+                    colors: ["#3bf", "#48b", "#fc0", "#b84"],
+                    axisOptions: {
+                        xAxisMode: 'tick',
+                        xIsSeries: true,
+                    },
+                    lineOptions: {
+                        regionFill: 1,
+                    },
+                    tooltipOptions: {
+                        formatTooltipX: data => `Godot ${data} editor binary size`,
+                        formatTooltipY: data => `${data} MB`,
+                    },
+                });
+
+                const chartExportTemplates = new frappe.Chart("#chart-export-templates", {
+                    data: dataExportTemplates,
+                    type: "line",
+                    height: 600,
+                    colors: ["#3bf", "#48b", "#fc0", "#b84", "#f72", "#b41"],
+                    axisOptions: {
+                        xAxisMode: 'tick',
+                        xIsSeries: true,
+                    },
+                    lineOptions: {
+                        regionFill: 1,
+                    },
+                    tooltipOptions: {
+                        formatTooltipX: data => `Godot ${data} release export template binary size`,
+                        formatTooltipY: data => `${data} MB`,
+                    },
+                });
+
+                const chartExportTemplatesTpz = new frappe.Chart("#chart-export-templates-tpz", {
+                    data: dataExportTemplatesTpz,
+                    type: "line",
+                    height: 600,
+                    colors: ["#aaa", "#777"],
+                    axisOptions: {
+                        xAxisMode: 'tick',
+                        xIsSeries: true,
+                    },
+                    lineOptions: {
+                        regionFill: 1,
+                    },
+                    tooltipOptions: {
+                        formatTooltipX: data => `Godot ${data} export templates TPZ size`,
+                        formatTooltipY: data => `${data} MB`,
+                    },
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <h1>Godot Engine binary size history</h1>
+        <p>
+            This page tracks official <a href="https://godotengine.org">Godot Engine</a>
+            release binary sizes of every stable version to check for trends and
+            regressions.
+        </p>
+        <p>
+            On the charts below, <strong>Download</strong> represents the size
+            of the ZIP archive. This is the amount of data the user needs to
+            download to extract the archive. In contrast,
+            <strong>Extracted</strong> represents the size on disk after
+            extracting the ZIP archive that contains the binary – this is the
+            "installed size" so to speak.
+        </p>
+        <p>
+            For Windows and Linux, all sizes on this page are for x86_64
+            (64-bit) binaries.
+        </p>
+        <h2>Editor</h2>
+        <p>
+            The editor binaries include editor-only functionality and are
+            compiled with debugging enabled. This makes them larger compared to
+            export template binaries.
+        </p>
+        <p>
+            Keeping editor binary sizes as low as possible is important to
+            ensure fast download speeds, even on slow Internet connections.
+        </p>
+        <div id="chart-editor"></div>
+
+        <h2>Release export templates</h2>
+        <p>
+            Export templates only contain a subset of Godot's editor features,
+            making them significantly smaller than editor binaries.
+        </p>
+        <p>
+            This is the <em>minimum</em> size that exported projects will be
+            when using official export templates. This can be decreased by compiling a
+            <a href="https://docs.godotengine.org/en/stable/development/compiling/optimizing_for_size.html">custom export template with size optimizations</a>.
+        </p>
+        <p>
+            This figure does not include project data such as textures and sounds. In a complex project (especially in 3D), the project data will often be much larger than the executable.
+        </p>
+        <p>
+            <strong>Note:</strong> Since individual export templates are not
+            available as ZIP files, the download sizes indicated here are
+            calculated by listing the compressed size of the individual export
+            template binary within the TPZ file.
+        </p>
+        <div id="chart-export-templates"></div>
+
+        <h2>Export template TPZ archive (all platforms)</h2>
+        <p>
+            This is the amount of data that needs to be downloaded once (and
+            stored on disk) to be able to export Godot projects from the editor.
+        </p>
+        <p>
+            In the future, this may be decreased by
+            <a href="https://github.com/godotengine/godot-proposals/issues/647">packaging each platform in a separate TPZ file</a>.
+            This way, users could download only export templates for the
+            platforms they intend to export to.
+        </p>
+        <div id="chart-export-templates-tpz"></div>
+
+        <footer>
+            © 2022 Hugo Locurcio and contributors<br>
+            <a href="https://github.com/Calinou/godot-size-history">Website source on GitHub</a>
+        </footer>
+    </body>
+</html>
