@@ -1,9 +1,29 @@
 #!/usr/bin/env python3
+
 import io
 import sys
 import zipfile
 
 import requests
+
+
+def get_current_godot_versions() -> list[str]:
+    versions: list[str] = []
+    page: int = 1
+    while True:
+        response = requests.get(
+            "https://api.github.com/repos/godotengine/godot/releases",
+            params={"per_page": 100, "page": page},
+        )
+        if response.status_code != 200:
+            break
+        data = response.json()
+        if not data:
+            break
+        versions.extend(release["tag_name"] for release in data)
+        page += 1
+    versions.pop()  # We don't list `1.0-stable`.
+    return versions
 
 
 def get_download_size(url: str) -> int:
@@ -20,20 +40,23 @@ def get_export_template_sizes(url: str) -> dict[str, tuple[str, str]]:
     sizes: dict[str, tuple[str, str]] = {}
 
     linux_template_name = (
-        "templates/linux_release.x86_64"
-        if version[0] == '4'
-        else "templates/linux_x11_64_release"
+        "linux_release.x86_64" if version[0] == "4" else "linux_x11_64_release"
     )
     windows_template_name = (
-        "templates/windows_release_x86_64.exe"
-        if version[0] == '4'
-        else "templates/windows_64_release.exe"
+        "windows_release_x86_64.exe" if version[0] == "4" else "windows_64_release.exe"
     )
     web_template_name = (
-        "templates/web_release.zip"
-        if version[0] == '4'
-        else "templates/webassembly_release.zip"
+        "web_release.zip"
+        if version[0] == "4"
+        else (
+            "webassembly_release.zip" if version[0] == "3" else "javascript_release.zip"
+        )
     )
+
+    if not (version[0] == "1" or version.startswith("2.0-")):
+        linux_template_name = f"templates/{linux_template_name}"
+        windows_template_name = f"templates/{windows_template_name}"
+        web_template_name = f"templates/{web_template_name}"
 
     response = requests.get(url)
     if response.status_code == 200:
@@ -68,10 +91,15 @@ def get_extracted_size_editor(url: str, version: str, linux: bool) -> int:
         return -1
     target = f"Godot_v{version}_win64.exe"
     if linux:
-        if version[0] == '4':
+        if version[0] == "4":
             target = f"Godot_v{version}_linux.x86_64"
         else:
             target = f"Godot_v{version}_x11.64"
+    if version[0] == "1" or version.startswith("2.0"):
+        if linux:
+            target = f"{target[:-14]}_{target[-13:]}"
+        else:
+            target = f"{target[:-17]}_{target[-16:]}"
     with zipfile.ZipFile(io.BytesIO(response.content)) as z:
         for info in z.infolist():
             if info.filename == target:
@@ -81,9 +109,11 @@ def get_extracted_size_editor(url: str, version: str, linux: bool) -> int:
 
 def get_version_sizes(version: str) -> dict[str, tuple[str, str]]:
     base_url = f"https://github.com/godotengine/godot/releases/download/{version}/Godot_v{version}"
+    if version[0] == "1" or version.startswith("2.0"):
+        base_url = f"{base_url[:-7]}_{base_url[-6:]}"
     editor_url_linux = (
         f"{base_url}_linux.x86_64.zip"
-        if version[0] == '4'
+        if version[0] == "4"
         else f"{base_url}_x11.64.zip"
     )
     editor_url_windows = f"{base_url}_win64.exe.zip"
@@ -139,5 +169,12 @@ def main(version: str) -> None:
 
 
 if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python get_version_sizes.py <version>")
+        sys.exit(1)
     version = sys.argv[1]
+    versions = get_current_godot_versions()
+    if version not in versions:
+        print(f'Version "{version}" not found.')
+        sys.exit(1)
     main(version)
