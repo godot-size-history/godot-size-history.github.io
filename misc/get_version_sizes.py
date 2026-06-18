@@ -173,6 +173,10 @@ if __name__ == "__main__":
         print("Usage: python get_version_sizes.py <version>")
         sys.exit(1)
     version = sys.argv[1]
+    if "-" not in version:
+        # If no suffix is provided, assume it's a stable release.
+        version = f"{version}-stable"
+
     versions = get_current_godot_versions()
     if version not in versions:
         print(f'Version "{version}" not found.')
