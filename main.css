@@ -1,0 +1,75 @@
+@font-face {
+    font-family: "Inter";
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    src: url("thirdparty/fonts/inter-regular.woff2");
+}
+
+@font-face {
+    font-family: "Inter";
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+    src: url("thirdparty/fonts/inter-italic.woff2");
+}
+
+@font-face {
+    font-family: "Inter";
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+    src: url("thirdparty/fonts/inter-bold.woff2");
+}
+
+@font-face {
+    font-family: "Inter";
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+    src: url("thirdparty/fonts/inter-bold-italic.woff2");
+}
+
+:root {
+  --body-background-color: hsl(0, 0%, 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --body-background-color: #262626;
+
+    /* Override water.css variables to match the Godot 4.6+ modern theme. */
+    --background: #141414;
+    --background-alt: #1b1b1b;
+    --button-base: #1b1b1b;
+    --button-hover: #141414;
+    --border: hsla(0, 0%, 50%, 0.5);
+  }
+
+  input, code {
+    background-color: #1d1d1d;
+  }
+}
+
+body {
+  background-color: var(--body-background-color);
+  /* Use a modern font stack as a fallback if the web font can't be loaded. */
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  /* Match the Godot 4.6+ editor default. */
+  font-feature-settings: "calt" 0, "ss04" 1, "tnum" 1;
+  line-height: 1.618;
+}
+
+/* Make Frappe better handle dark themes. */
+.line-horizontal,
+.line-vertical {
+    stroke: hsla(0, 0%, 50%, 0.5) !important;
+}
+
+/* Stylistic Frappe change (remove outlines around line datapoints). */
+/* This helps make charts look less busy, especially on narrow displays. */
+.chart-container .dataset-units circle {
+    stroke: transparent !important;
+}
